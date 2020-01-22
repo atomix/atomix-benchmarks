@@ -32,9 +32,5 @@ image: # @HELP build atomix-benchmarks Docker image
 image: build
 	docker build . -f build/docker/Dockerfile -t atomix/atomix-benchmarks:${ATOMIX_BENCHMARKS_VERSION}
 
-benchmarks: # @HELP build onos-config benchmarks Docker image
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/atomix-raft-benchmarks/_output/bin/atomix-raft-benchmarks ./cmd/atomix-raft-benchmarks
-	docker build . -f build/atomix-raft-benchmarks/Dockerfile -t atomix/atomix-raft-benchmarks:${ATOMIX_BENCHMARKS_VERSION}
-
 push: # @HELP push atomix-benchmarks Docker image
 	docker push atomix/atomix-benchmarks:${ATOMIX_BENCHMARKS_VERSION}
