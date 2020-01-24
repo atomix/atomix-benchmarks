@@ -15,7 +15,7 @@
 package main
 
 import (
-	"github.com/atomix/k8s-benchmarks/benchmark/map"
+	"github.com/atomix/kubernetes-benchmarks/benchmark/map"
 	"github.com/onosproject/onos-test/pkg/benchmark"
 )
 

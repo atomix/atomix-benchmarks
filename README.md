@@ -1,2 +1,2 @@
-# k8s-benchmarks
+# kubernetes-benchmarks
 Kubernetes benchmarks for Atomix primitives
