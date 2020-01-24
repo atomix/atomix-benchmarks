@@ -17,7 +17,7 @@ package _map
 import (
 	"context"
 	"errors"
-	"github.com/atomix/atomix-go-client/pkg/client/map"
+	"github.com/atomix/go-client/pkg/client/map"
 	"github.com/onosproject/onos-test/pkg/benchmark"
 	"github.com/onosproject/onos-test/pkg/benchmark/params"
 	"github.com/onosproject/onos-test/pkg/onit/env"
