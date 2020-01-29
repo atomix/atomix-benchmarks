@@ -19,7 +19,8 @@ linters: # @HELP examines Go source code and reports coding problems
 	golangci-lint run
 
 license_check: # @HELP examine and ensure license headers exist
-	./build/licensing/boilerplate.py -v
+	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
+	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
 proto: # @HELP build Protobuf/gRPC generated types
 proto:
@@ -28,9 +29,6 @@ proto:
 		--entrypoint build/bin/compile_protos.sh \
 		onosproject/protoc-go:stable
 
-image: # @HELP build kubernetes-benchmarks Docker image
-image: build
+images: # @HELP build kubernetes-benchmarks Docker image
+images:
 	docker build . -f build/docker/Dockerfile -t atomix/kubernetes-benchmarks:${ATOMIX_BENCHMARKS_VERSION}
-
-push: # @HELP push kubernetes-benchmarks Docker image
-	docker push atomix/kubernetes-benchmarks:${ATOMIX_BENCHMARKS_VERSION}

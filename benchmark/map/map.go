@@ -17,12 +17,13 @@ package _map
 import (
 	"context"
 	"errors"
-	"github.com/atomix/go-client/pkg/client/map"
+	"time"
+
+	_map "github.com/atomix/go-client/pkg/client/map"
 	"github.com/onosproject/onos-test/pkg/benchmark"
 	"github.com/onosproject/onos-test/pkg/benchmark/params"
 	"github.com/onosproject/onos-test/pkg/onit/env"
 	"github.com/onosproject/onos-test/pkg/onit/setup"
-	"time"
 )
 
 // MapBenchmarkSuite :: benchmark
@@ -118,7 +119,7 @@ func (s *MapBenchmarkSuite) SetupBenchmarkMapEntries(c *benchmark.Context) {
 	value := params.RandomBytes(c.GetArg("value-length").Int(128))
 	for i := 0; i < c.GetArg("key-count").Int(1000); i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		s._map.Put(ctx, key.Next().(string), value.Next().([]byte))
+		_, _ = s._map.Put(ctx, key.Next().(string), value.Next().([]byte))
 		cancel()
 	}
 }
