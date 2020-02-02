@@ -35,13 +35,13 @@ type MapBenchmarkSuite struct {
 
 // SetupSuite :: benchmark
 func (s *MapBenchmarkSuite) SetupSuite(c *benchmark.Context) {
-	setup.Partitions("raft").Raft()
+	setup.Database("raft").Raft()
 	setup.SetupOrDie()
 }
 
 // SetupBenchmark :: benchmark
 func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) {
-	group, err := env.Database().Partitions("raft").Connect()
+	group, err := env.Storage().Database("raft").Connect()
 	if err != nil {
 		panic(err)
 	}
