@@ -30,5 +30,5 @@ proto:
 		onosproject/protoc-go:stable
 
 images: # @HELP build kubernetes-benchmarks Docker image
-images:
+images: build
 	docker build . -f build/docker/Dockerfile -t atomix/kubernetes-benchmarks:${ATOMIX_BENCHMARKS_VERSION}

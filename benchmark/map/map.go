@@ -54,7 +54,7 @@ func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) {
 
 // TearDownBenchmark :: benchmark
 func (s *MapBenchmarkSuite) TearDownBenchmark(c *benchmark.Context) {
-	s._map.Close()
+	s._map.Close(context.Background())
 }
 
 // BenchmarkMapPut :: benchmark
