@@ -1,6 +1,6 @@
 module github.com/atomix/kubernetes-benchmarks
 
-go 1.12
+go 1.13
 
 require (
 	github.com/atomix/atomix-go-client v0.0.0-20200114212658-58c359bc47b1 // indirect
