@@ -21,7 +21,6 @@ import (
 	atomix "github.com/atomix/go-client/pkg/client"
 	"github.com/onosproject/helmit/pkg/helm"
 	"github.com/onosproject/helmit/pkg/input"
-	"github.com/onosproject/helmit/pkg/kubernetes"
 	"time"
 
 	"github.com/atomix/go-client/pkg/client/map"
@@ -49,9 +48,9 @@ func (s *MapBenchmarkSuite) SetupSuite(c *benchmark.Context) error {
 
 	err = helm.Chart("atomix-database").
 		Release("atomix-database").
-		Set("clusters", 3).
-		Set("partitions", 10).
-		Set("backend.replicas", 3).
+		Set("clusters", 1).
+		Set("partitions", 1).
+		Set("backend.replicas", 1).
 		Set("backend.image", "atomix/local-replica:latest").
 		Install(true)
 	if err != nil {
@@ -73,36 +72,20 @@ func (s *MapBenchmarkSuite) SetupWorker(c *benchmark.Context) error {
 	return nil
 }
 
-func (s *MapBenchmarkSuite) getController() (string, error) {
-	client, err := kubernetes.NewForRelease(helm.Release("atomix-controller"))
-	if err != nil {
-		return "", err
-	}
-	services, err := client.CoreV1().Services().List()
-	if err != nil {
-		return "", err
-	}
-	if len(services) == 0 {
-		return "", nil
-	}
-	service := services[0]
-	return fmt.Sprintf("%s.%s.svc.cluster.local:%d", service.Name, service.Namespace, service.Ports()[0].Port), nil
-}
-
 // SetupBenchmark :: benchmark
 func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) error {
-	address, err := s.getController()
+	client, err := atomix.New(
+		"atomix-controller:5679",
+		atomix.WithNamespace(helm.Namespace()),
+		atomix.WithScope(c.Name))
 	if err != nil {
-		return err
-	}
-
-	client, err := atomix.New(address)
-	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
 	database, err := client.GetDatabase(context.Background(), "atomix-database")
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
