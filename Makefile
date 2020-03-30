@@ -28,7 +28,3 @@ proto:
 		-w /go/src/github.com/atomix/kubernetes-benchmarks \
 		--entrypoint build/bin/compile_protos.sh \
 		onosproject/protoc-go:stable
-
-images: # @HELP build kubernetes-benchmarks Docker image
-images: build
-	docker build . -f build/docker/Dockerfile -t atomix/kubernetes-benchmarks:${ATOMIX_BENCHMARKS_VERSION}
