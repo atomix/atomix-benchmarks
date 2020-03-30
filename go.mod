@@ -3,7 +3,8 @@ module github.com/atomix/kubernetes-benchmarks
 go 1.13
 
 require (
-	github.com/atomix/atomix-go-client v0.0.0-20200114212658-58c359bc47b1 // indirect
-	github.com/atomix/go-client v0.0.0-20200206051325-cdc03bd1c8bc
-	github.com/onosproject/onos-test v0.0.0-20200202125349-5b744e8890fb
+	github.com/atomix/go-client v0.0.0-20200311175822-e2ecd2d6784d
+	github.com/onosproject/helmit v0.0.0-20200327211207-6ee099c52d08
 )
+
+replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20200229013735-71373c6105e3

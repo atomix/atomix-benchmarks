@@ -16,10 +16,11 @@ package main
 
 import (
 	"github.com/atomix/kubernetes-benchmarks/benchmark/map"
-	"github.com/onosproject/onos-test/pkg/benchmark"
+	"github.com/onosproject/helmit/pkg/benchmark"
+	"github.com/onosproject/helmit/pkg/registry"
 )
 
 func main() {
-	benchmark.Register("map", &_map.MapBenchmarkSuite{})
+	registry.RegisterBenchmarkSuite("map", &_map.MapBenchmarkSuite{})
 	benchmark.Main()
 }
