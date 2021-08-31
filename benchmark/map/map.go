@@ -38,7 +38,7 @@ type MapBenchmarkSuite struct {
 
 // SetupSuite :: benchmark
 func (s *MapBenchmarkSuite) SetupSuite(c *benchmark.Context) error {
-	err := helm.Chart("atomix-controller").
+	err := helm.Chart("kubernetes-controller", "https://charts.atomix.io").
 		Release("atomix-controller").
 		Set("scope", "Namespace").
 		Install(true)
@@ -46,12 +46,18 @@ func (s *MapBenchmarkSuite) SetupSuite(c *benchmark.Context) error {
 		return err
 	}
 
-	err = helm.Chart("atomix-database").
+	err = helm.Chart("cache-storage-controller", "https://charts.atomix.io").
+		Release("cache-storage-controller").
+		Set("scope", "Namespace").
+		Install(true)
+	if err != nil {
+		return err
+	}
+
+	err = helm.Chart("cache-database", "https://charts.atomix.io").
 		Release("atomix-database").
 		Set("clusters", 1).
 		Set("partitions", 1).
-		Set("backend.replicas", 1).
-		Set("backend.image", "atomix/local-replica:latest").
 		Install(true)
 	if err != nil {
 		return err
@@ -65,17 +71,14 @@ func (s *MapBenchmarkSuite) SetupWorker(c *benchmark.Context) error {
 		input.SetOf(
 			input.RandomString(c.GetArg("key-length").Int(8)),
 			c.GetArg("key-count").Int(1000)))
-	s.value = input.RandomChoice(
-		input.SetOf(
-			input.RandomBytes(c.GetArg("value-length").Int(128)),
-			c.GetArg("value-count").Int(1)))
+	s.value = input.RandomBytes(c.GetArg("value-length").Int(128))
 	return nil
 }
 
 // SetupBenchmark :: benchmark
 func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) error {
 	client, err := atomix.New(
-		"atomix-controller:5679",
+		"atomix-controller-kubernetes-controller:5679",
 		atomix.WithNamespace(helm.Namespace()),
 		atomix.WithScope(c.Name))
 	if err != nil {
@@ -83,7 +86,7 @@ func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) error {
 		return err
 	}
 
-	database, err := client.GetDatabase(context.Background(), "atomix-database")
+	database, err := client.GetDatabase(context.Background(), "atomix-database-cache-database")
 	if err != nil {
 		fmt.Println(err)
 		return err
