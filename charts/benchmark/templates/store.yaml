@@ -1,0 +1,36 @@
+apiVersion: atomix.io/v2beta1
+kind: Store
+metadata:
+  name: {{ .Release.Name }}-raft
+  namespace: {{ .Release.Namespace }}
+spec:
+  protocol:
+    apiVersion: storage.atomix.io/v2beta2
+    kind: MultiRaftProtocol
+    spec:
+      replicas: {{ .Values.store.replicas }}
+      groups: {{ .Values.store.partitions }}
+      {{- with .Values.store.raft }}
+      raft:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      image: {{ template "benchmark.store.imagename" . }}
+      imagePullPolicy: {{ .Values.store.image.pullPolicy }}
+      {{- with .Values.store.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.store.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.store.persistence.storageClass }}
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          storageClassName: {{ .Values.store.persistence.storageClass | quote }}
+          resources:
+            requests:
+              storage: {{ .Values.store.persistence.storageSize }}
+      {{- end }}

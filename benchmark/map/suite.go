@@ -17,13 +17,12 @@ package _map
 import (
 	"context"
 	"errors"
-	"fmt"
-	atomix "github.com/atomix/go-client/pkg/client"
+	"github.com/atomix/atomix-go-client/pkg/atomix"
+	"github.com/atomix/atomix-go-client/pkg/atomix/map"
 	"github.com/onosproject/helmit/pkg/helm"
 	"github.com/onosproject/helmit/pkg/input"
 	"time"
 
-	"github.com/atomix/go-client/pkg/client/map"
 	"github.com/onosproject/helmit/pkg/benchmark"
 )
 
@@ -33,31 +32,13 @@ type MapBenchmarkSuite struct {
 	key     input.Source
 	value   input.Source
 	_map    _map.Map
-	watchCh chan *_map.Event
+	watchCh chan _map.Event
 }
 
 // SetupSuite :: benchmark
-func (s *MapBenchmarkSuite) SetupSuite(c *benchmark.Context) error {
-	err := helm.Chart("kubernetes-controller", "https://charts.atomix.io").
-		Release("atomix-controller").
-		Set("scope", "Namespace").
-		Install(true)
-	if err != nil {
-		return err
-	}
-
-	err = helm.Chart("cache-storage-controller", "https://charts.atomix.io").
-		Release("cache-storage-controller").
-		Set("scope", "Namespace").
-		Install(true)
-	if err != nil {
-		return err
-	}
-
-	err = helm.Chart("cache-database", "https://charts.atomix.io").
-		Release("atomix-database").
-		Set("clusters", 1).
-		Set("partitions", 1).
+func (s *MapBenchmarkSuite) SetupSuite(c *input.Context) error {
+	err := helm.Chart("./benchmark").
+		Release("benchmark").
 		Install(true)
 	if err != nil {
 		return err
@@ -66,7 +47,7 @@ func (s *MapBenchmarkSuite) SetupSuite(c *benchmark.Context) error {
 }
 
 // SetupWorker :: benchmark
-func (s *MapBenchmarkSuite) SetupWorker(c *benchmark.Context) error {
+func (s *MapBenchmarkSuite) SetupWorker(c *input.Context) error {
 	s.key = input.RandomChoice(
 		input.SetOf(
 			input.RandomString(c.GetArg("key-length").Int(8)),
@@ -76,23 +57,8 @@ func (s *MapBenchmarkSuite) SetupWorker(c *benchmark.Context) error {
 }
 
 // SetupBenchmark :: benchmark
-func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) error {
-	client, err := atomix.New(
-		"atomix-controller-kubernetes-controller:5679",
-		atomix.WithNamespace(helm.Namespace()),
-		atomix.WithScope(c.Name))
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	database, err := client.GetDatabase(context.Background(), "atomix-database-cache-database")
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	_map, err := database.GetMap(context.Background(), c.Name)
+func (s *MapBenchmarkSuite) SetupBenchmark(c *input.Context) error {
+	_map, err := atomix.GetMap(context.Background(), "benchmark-map")
 	if err != nil {
 		return err
 	}
@@ -101,7 +67,7 @@ func (s *MapBenchmarkSuite) SetupBenchmark(c *benchmark.Context) error {
 }
 
 // TearDownBenchmark :: benchmark
-func (s *MapBenchmarkSuite) TearDownBenchmark(c *benchmark.Context) {
+func (s *MapBenchmarkSuite) TearDownBenchmark(c *input.Context) {
 	s._map.Close(context.Background())
 }
 
@@ -118,8 +84,8 @@ func (s *MapBenchmarkSuite) BenchmarkMapGet(b *benchmark.Benchmark) error {
 }
 
 // SetupBenchmarkMapEvent sets up the map event benchmark
-func (s *MapBenchmarkSuite) SetupBenchmarkMapEvent(c *benchmark.Context) {
-	watchCh := make(chan *_map.Event)
+func (s *MapBenchmarkSuite) SetupBenchmarkMapEvent(c *input.Context) {
+	watchCh := make(chan _map.Event)
 	if err := s._map.Watch(context.Background(), watchCh); err != nil {
 		panic(err)
 	}
@@ -127,7 +93,7 @@ func (s *MapBenchmarkSuite) SetupBenchmarkMapEvent(c *benchmark.Context) {
 }
 
 // TearDownBenchmarkMapEvent tears down the map event benchmark
-func (s *MapBenchmarkSuite) TearDownBenchmarkMapEvent(c *benchmark.Context) {
+func (s *MapBenchmarkSuite) TearDownBenchmarkMapEvent(c *input.Context) {
 	s.watchCh = nil
 }
 
@@ -143,7 +109,7 @@ func (s *MapBenchmarkSuite) BenchmarkMapEvent(b *benchmark.Benchmark) error {
 }
 
 // SetupBenchmarkMapEntries sets up the map entries benchmark
-func (s *MapBenchmarkSuite) SetupBenchmarkMapEntries(c *benchmark.Context) error {
+func (s *MapBenchmarkSuite) SetupBenchmarkMapEntries(c *input.Context) error {
 	for i := 0; i < c.GetArg("key-count").Int(1000); i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		_, err := s._map.Put(ctx, s.key.Next().String(), s.value.Next().Bytes())
@@ -157,7 +123,7 @@ func (s *MapBenchmarkSuite) SetupBenchmarkMapEntries(c *benchmark.Context) error
 
 // BenchmarkMapEntries :: benchmark
 func (s *MapBenchmarkSuite) BenchmarkMapEntries(b *benchmark.Benchmark) error {
-	ch := make(chan *_map.Entry)
+	ch := make(chan _map.Entry)
 	err := s._map.Entries(context.Background(), ch)
 	if err != nil {
 		return err

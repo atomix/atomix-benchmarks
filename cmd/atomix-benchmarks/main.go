@@ -15,7 +15,7 @@
 package main
 
 import (
-	"github.com/atomix/kubernetes-benchmarks/benchmark/map"
+	"github.com/atomix/atomix-benchmarks/benchmark/map"
 	"github.com/onosproject/helmit/pkg/benchmark"
 	"github.com/onosproject/helmit/pkg/registry"
 )

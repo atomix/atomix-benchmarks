@@ -1,0 +1,13 @@
+apiVersion: v2
+name: atomix-benchmark
+description: Atomix store and primitives for testing
+kubeVersion: ">=1.17.0"
+type: application
+version: 0.1.0
+appVersion: v0.1.0
+keywords:
+  - atomix
+home: https://cloud.atomix.io
+maintainers:
+  - name: kuujo
+    email: jordan@opennetworking.org
